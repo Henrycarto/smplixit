@@ -104,11 +104,50 @@ If the pipeline cannot satisfy all four within `MAX_REWRITE_ATTEMPTS` passes, th
 ## Testing
 
 ```bash
+npm run typecheck                        # all workspaces, not just apps/web
 npm run lint && npm run build            # web
 cd services/core && pytest               # per service
 ```
 
-CI runs both matrices on every push. See `.github/workflows/ci.yml`.
+Run `npm run typecheck` from the repository root rather than `tsc` inside `apps/web`. The two packages set `noUncheckedIndexedAccess` and the web app does not, so a type error in `packages/` will not surface from the app directory. The root script is what CI runs.
+
+CI covers eight jobs on every push: the web build, a service matrix across all three, a Docker image build for each, and Terraform validate. See `.github/workflows/ci.yml`.
+
+---
+
+## Deployment
+
+`.github/workflows/deploy.yml` is **manual trigger only**. It has no `push` trigger, and that is deliberate rather than an omission.
+
+The workflow assumes an AWS OIDC role and an ECR registry that do not exist yet. Wiring it to `push` before they do would leave the Actions tab permanently red on a job nobody can fix, which is how a team learns to ignore a failing pipeline and then misses the failure that matters.
+
+To enable continuous deployment, in one change:
+
+1. Provision the deploy role and registry (`infra/terraform`, then register the OIDC provider).
+2. Configure the repository settings the workflow reads:
+
+   | Kind | Name | Required |
+   | --- | --- | --- |
+   | Secret | `AWS_DEPLOY_ROLE_ARN` | Yes |
+   | Secret | `ENGINE_ARTIFACT_URI` | Optional. Without it the build falls back to the engine templates. |
+   | Variable | `CORE_API_URL`, `POLY_API_URL`, `GUARD_API_URL` | Yes |
+   | Variable | `WEB_BUCKET`, `CLOUDFRONT_DISTRIBUTION_ID` | Yes |
+
+   The ECR registry is not configured. It comes from the `amazon-ecr-login` step output, so it follows whichever account the role assumes.
+
+3. Add the trigger back to `deploy.yml`:
+
+```yaml
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    ...
+```
+
+Until then, deploy to staging with `gh workflow run deploy.yml -f environment=staging`, which surfaces a real failure rather than a permanent one.
+
+Note that the deploy workflow is not exercised by CI. Its action versions and AWS steps have never run, so the first dispatch is also its first test.
 
 ---
 
