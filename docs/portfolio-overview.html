@@ -775,7 +775,7 @@
 
       <div class="status">
         <div class="status-row ok">
-          <p><span class="chip ok">Verified</span><strong>50 tests passing across three services.</strong> 10 on scoring, 14 on terminology protection and the language registry, 26 on drug extraction and the pre/post comparison. All three lint clean.</p>
+          <p><span class="chip ok">Verified</span><strong>53 tests passing across three services.</strong> 13 on scoring, 14 on terminology protection and the language registry, 26 on drug extraction and the pre/post comparison. All three lint clean, on Linux and Python 3.11 rather than only on the development machine.</p>
         </div>
         <div class="status-row ok">
           <p><span class="chip ok">Verified</span><strong>Guard exercised end to end.</strong> A faithful rewrite passes at 100. The same rewrite with the furosemide dose altered from 40&nbsp;mg to 4&nbsp;mg and one warning removed is blocked at 15 with two critical findings, each naming source and output values.</p>
@@ -789,9 +789,13 @@
         <div class="status-row ok">
           <p><span class="chip ok">Verified</span><strong>Outages read as outages.</strong> With the database down the dashboard reports a 503, not an empty list, so an outage cannot render as "no records".</p>
         </div>
+        <div class="status-row ok">
+          <p><span class="chip ok">Verified</span><strong>Images build and infrastructure validates.</strong> All three Docker images build from a clean checkout, and the Terraform configuration validates against the AWS provider schema. CI is green across all eight jobs.</p>
+        </div>
         <div class="status-row pending">
           <p><span class="chip pending">Not run</span><strong>No external credential was used,</strong> so every third-party integration is unproven against its live service.</p>
-          <p>No live model call, so the rewrite loop's convergence against a real model is unmeasured. This is the largest open item. No live DeepL call. No live openFDA call, Guard is tested against stub fixtures. No database instance. Docker images never built, Terraform never validated locally; CI covers both.</p>
+          <p>No live model call, so the rewrite loop's convergence against a real model is unmeasured. This is the largest open item. No live DeepL call. No live openFDA call, Guard is tested against stub fixtures. No database instance.</p>
+          <p>No container has run in ECS and no Terraform plan or apply has touched an AWS account. An image that builds is not an image that runs under a task definition, and a configuration that validates is not one that provisions. Both checks catch syntax and schema errors, which is what they are worth and no more. Deploy stays manual-trigger only until the OIDC role and registry exist.</p>
         </div>
         <div class="status-row pending">
           <p><span class="chip pending">Needs access</span><strong>The SMART on FHIR flow has never executed against a server,</strong> including a vendor sandbox.</p>

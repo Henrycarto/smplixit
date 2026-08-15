@@ -86,7 +86,7 @@ Stated precisely, because the distinction between tested and written matters in 
 
 ### Verified working
 
-- 50 tests passing: 10 on scoring, 14 on terminology protection and the language registry, 26 on drug extraction and the pre/post comparison. All three services lint clean.
+- 53 tests passing: 13 on scoring, 14 on terminology protection and the language registry, 26 on drug extraction and the pre/post comparison. All three services lint clean.
 - Guard exercised end to end offline. A faithful rewrite passes at 100. The same rewrite with the furosemide dose altered from 40 mg to 4 mg and one warning removed is blocked at 15 with two critical findings, each naming the source and output values.
 - Clinical shorthand and plain language normalize to the same structure, which is the property the entire comparison rests on.
 - Poly returns 66 languages across two tiers, rejects unsupported targets, and routes a tier-two language to interpreter services rather than translating it.
@@ -94,6 +94,10 @@ Stated precisely, because the distinction between tested and written matters in 
 - Web console typechecks and builds clean across all 8 routes.
 - Clean-clone path verified: templates materialize, tests pass, service boots, rubric falls back to its example seed.
 - Repository boundary verified: the three withheld files and all environment files are excluded, every template and the full FHIR and openFDA layer are tracked.
+- **All three Docker images build** from their Dockerfiles on a clean checkout.
+- **Terraform configuration validates** against the AWS provider schema, formatting included.
+- The full suite passes on Linux and Python 3.11, the deployment target, rather than only on the development machine.
+- CI is green across all eight jobs: web, three service matrices, three image builds, and Terraform.
 
 ### Written but not exercised
 
@@ -103,7 +107,8 @@ No external credential was used, so every third-party integration is unproven ag
 - **No live DeepL call.** Term protection and survival verification are tested offline against the exact payload structure.
 - **No live openFDA call.** Guard is tested against stub label fixtures.
 - **No database instance.** The schema and audit writes are defined but have never run against live PostgreSQL.
-- **Docker images never built, compose never started, Terraform never validated locally.** CI covers all three.
+- **No container has run in ECS, and no Terraform plan or apply has touched an AWS account.** An image that builds is not an image that runs under a task definition, and a configuration that validates is not a configuration that provisions. Both checks catch syntax and schema errors, which is what they are worth and no more.
+- **Deploy is manual-trigger only** until the AWS OIDC role and ECR registry exist. Wiring it to push before then would leave the pipeline permanently red on a job nobody can fix.
 
 ### Requires EHR credentials to go live
 
