@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
 
+import { IS_SHOWCASE, PORTFOLIO_URL, SITE, SITE_URL, navItems } from "@/lib/site";
 import "./globals.css";
 
 const inter = Inter({
@@ -11,16 +12,28 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Smplixit",
-  description:
-    "Adaptive health literacy engine. Rewrites discharge summaries to a measured reading grade, translates them, and proves no medication instruction was lost.",
-  robots: { index: false, follow: false },
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE.name,
+    template: `%s | ${SITE.name}`,
+  },
+  description: SITE.description,
+  // The console handles PHI and must never be indexed. The public showcase
+  // has no patient data in it and exists to be found.
+  robots: IS_SHOWCASE ? { index: true, follow: true } : { index: false, follow: false },
+  openGraph: {
+    type: "website",
+    siteName: SITE.name,
+    title: `${SITE.name}, ${SITE.tagline}`,
+    description: SITE.description,
+    url: SITE_URL,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE.name}, ${SITE.tagline}`,
+    description: SITE.description,
+  },
 };
-
-const NAV = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/simplify", label: "Simplify" },
-];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -31,6 +44,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </body>
     </html>
   );
+}
+
+/** Render the portfolio backlink as its hostname, without the www prefix. */
+function portfolioLabel(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "Portfolio";
+  }
 }
 
 /**
@@ -50,7 +72,7 @@ function TopBar() {
       </Link>
 
       <nav className="flex items-center gap-1">
-        {NAV.map((item) => (
+        {navItems().map((item) => (
           <Link
             key={item.href}
             href={item.href}
@@ -62,15 +84,26 @@ function TopBar() {
       </nav>
 
       <div className="ml-auto flex items-center gap-3">
-        <span className="border border-shell-border px-1.5 py-0.5 text-2xs uppercase tracking-label text-slate">
-          {environment}
-        </span>
-        <Link
-          href="/login"
-          className="text-xs text-slate transition-colors hover:text-white"
-        >
-          Sign in
-        </Link>
+        {IS_SHOWCASE ? null : (
+          <span className="border border-shell-border px-1.5 py-0.5 text-2xs uppercase tracking-label text-slate">
+            {environment}
+          </span>
+        )}
+        {IS_SHOWCASE ? (
+          PORTFOLIO_URL ? (
+            <a
+              href={PORTFOLIO_URL}
+              className="flex items-center gap-1.5 text-xs text-slate transition-colors hover:text-white"
+            >
+              <span aria-hidden="true">&larr;</span>
+              {portfolioLabel(PORTFOLIO_URL)}
+            </a>
+          ) : null
+        ) : (
+          <Link href="/login" className="text-xs text-slate transition-colors hover:text-white">
+            Sign in
+          </Link>
+        )}
       </div>
     </header>
   );
