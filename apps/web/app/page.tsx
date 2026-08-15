@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { ReadingLevelBadge } from "@/components/core/ReadingLevelBadge";
+import { IS_SHOWCASE } from "@/lib/site";
 
 /**
  * Landing page.
@@ -87,19 +88,41 @@ export default function LandingPage() {
               and under the CMS Hospital Readmissions Reduction Program it is expensive.
             </p>
 
+            {/* In showcase mode the services are unreachable, so the calls to
+                action lead to the case study rather than to a console that
+                would render connection errors. */}
             <div className="mt-6 flex items-center gap-2">
-              <Link
-                href="/simplify"
-                className="inline-flex h-9 items-center border border-accent bg-accent px-4 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
-              >
-                Open the console
-              </Link>
-              <Link
-                href="/dashboard"
-                className="inline-flex h-9 items-center border border-shell-border px-4 text-sm text-slate transition-colors hover:bg-shell-hover hover:text-white"
-              >
-                View job history
-              </Link>
+              {IS_SHOWCASE ? (
+                <>
+                  <Link
+                    href="/case-study"
+                    className="inline-flex h-9 items-center border border-accent bg-accent px-4 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+                  >
+                    Read the case study
+                  </Link>
+                  <a
+                    href="https://github.com/Henrycarto/smplixit"
+                    className="inline-flex h-9 items-center border border-shell-border px-4 text-sm text-slate transition-colors hover:bg-shell-hover hover:text-white"
+                  >
+                    Source on GitHub
+                  </a>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/simplify"
+                    className="inline-flex h-9 items-center border border-accent bg-accent px-4 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+                  >
+                    Open the console
+                  </Link>
+                  <Link
+                    href="/dashboard"
+                    className="inline-flex h-9 items-center border border-shell-border px-4 text-sm text-slate transition-colors hover:bg-shell-hover hover:text-white"
+                  >
+                    View job history
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 

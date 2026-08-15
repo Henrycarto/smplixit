@@ -115,6 +115,28 @@ CI covers eight jobs on every push: the web build, a service matrix across all t
 
 ---
 
+## Public showcase (Vercel)
+
+This repository deploys to Vercel as a standalone public page for the project, separate from the hospital deployment. Vercel cannot host the three FastAPI services, so the showcase serves only the two routes that work without a backend: the landing page and `/case-study`.
+
+Showcase mode is a build flag, not a separate build. Set `NEXT_PUBLIC_SHOWCASE=1` and the application:
+
+- Drops `Dashboard` and `Simplify` from the navigation, and repoints the landing page calls to action at the case study and the GitHub source. Nothing visible leads to a screen that would render a connection error.
+- Becomes indexable. The console deployment sets `robots: noindex` because it handles PHI; the showcase has no patient data and exists to be found. `/simplify`, `/dashboard`, `/login`, and `/api/` stay disallowed in `robots.txt` regardless.
+- Shows a link back to the portfolio in place of `Sign in`.
+
+| Variable | Value | Purpose |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SHOWCASE` | `1` | Enables showcase mode |
+| `NEXT_PUBLIC_SITE_URL` | the deployment origin | Resolves link preview and sitemap URLs |
+| `NEXT_PUBLIC_PORTFOLIO_URL` | the portfolio origin | Renders the way back. Unset renders no link rather than a dead one. |
+
+Project settings: root directory `apps/web`, framework Next.js. Install and build stay on the Vercel defaults, which resolve the npm workspace root and so pick up `@smplixit/shared-types` and `@smplixit/fhir-client`. `apps/web/vercel.json` carries the baseline security headers. It sits beside the application rather than at the repository root because Vercel reads `vercel.json` from the configured root directory, and a copy at the repository root would be silently ignored.
+
+Leave `NEXT_PUBLIC_SHOWCASE` unset for any deployment that has the services behind it, and the console behaves normally.
+
+---
+
 ## Deployment
 
 `.github/workflows/deploy.yml` is **manual trigger only**. It has no `push` trigger, and that is deliberate rather than an omission.
