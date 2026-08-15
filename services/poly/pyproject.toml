@@ -1,0 +1,22 @@
+[project]
+name = "smplixit-poly"
+version = "0.1.0"
+description = "Translation with medical terminology preservation"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "ASYNC"]
+ignore = [
+  "B008",   # FastAPI Depends() in defaults is the framework idiom
+  "UP042",  # (str, Enum) is the documented Pydantic idiom and serializes
+            # identically across 3.10 through 3.13. StrEnum changes str()
+            # behaviour on members, which would alter API output.
+]

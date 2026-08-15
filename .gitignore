@@ -1,0 +1,64 @@
+CLAUDE.md
+.claude/
+*.claude
+
+# ---------------------------------------------------------------------------
+# Proprietary engine modules.
+#
+# The rewrite pipeline and the grade-level constraint logic are the
+# differentiated part of this product and are not distributed with the repo.
+# Each has a tracked `.template.py` counterpart that implements the same public
+# interface at reference quality, so a clean clone still builds, boots, and
+# passes CI. Run `npm run bootstrap:engine` after cloning.
+# ---------------------------------------------------------------------------
+services/core/app/engine/prompt_builder.py
+services/core/app/engine/rewriter.py
+services/core/app/engine/rubrics/*.json
+!services/core/app/engine/rubrics/*.example.json
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+.pnpm-store/
+npm-debug.log*
+yarn-error.log*
+.turbo/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+venv/
+.venv/
+
+# Build output
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform.lock.hcl
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local artifacts
+coverage/
+*.pdf
+!docs/**/*.pdf

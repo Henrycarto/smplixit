@@ -1,0 +1,19 @@
+{
+  "name": "@smplixit/fhir-client",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SMART on FHIR OAuth 2.0 client for Epic and Cerner",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}

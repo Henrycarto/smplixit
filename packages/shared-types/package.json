@@ -1,0 +1,19 @@
+{
+  "name": "@smplixit/shared-types",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TypeScript contracts shared by the web console and the Python services",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}

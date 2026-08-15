@@ -1,0 +1,106 @@
+# Local development stack.
+#
+# Brings up Postgres and the three services. The web console runs outside
+# compose with `npm run dev` so hot reload works against the host filesystem.
+#
+# Service start order is enforced by health conditions rather than by
+# depends_on alone. Core refuses to release a rewrite it could not validate, so
+# starting Core before Guard is ready produces a wave of held documents on every
+# `docker compose up`.
+
+name: smplixit
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: smplixit-postgres
+    environment:
+      POSTGRES_USER: smplixit
+      POSTGRES_PASSWORD: smplixit
+      POSTGRES_DB: smplixit
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smplixit -d smplixit"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  guard:
+    build:
+      context: ../services/guard
+    container_name: smplixit-guard
+    ports:
+      - "8003:8003"
+    environment:
+      ENVIRONMENT: local
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      OPENFDA_API_KEY: ${OPENFDA_API_KEY:-}
+      OPENFDA_BASE_URL: ${OPENFDA_BASE_URL:-https://api.fda.gov}
+      ALLOWED_ORIGINS: http://localhost:3000
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8003/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  poly:
+    build:
+      context: ../services/poly
+    container_name: smplixit-poly
+    ports:
+      - "8002:8002"
+    environment:
+      ENVIRONMENT: local
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DEEPL_API_KEY: ${DEEPL_API_KEY:?set DEEPL_API_KEY in .env}
+      DEEPL_API_HOST: ${DEEPL_API_HOST:-https://api-free.deepl.com}
+      DEEPL_GLOSSARY_ID: ${DEEPL_GLOSSARY_ID:-}
+      ALLOWED_ORIGINS: http://localhost:3000
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  core:
+    build:
+      context: ../services/core
+    container_name: smplixit-core
+    ports:
+      - "8001:8001"
+    environment:
+      ENVIRONMENT: local
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?set OPENAI_API_KEY in .env}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o}
+      DEFAULT_TARGET_GRADE: ${DEFAULT_TARGET_GRADE:-6}
+      MAX_REWRITE_ATTEMPTS: ${MAX_REWRITE_ATTEMPTS:-3}
+      GRADE_TOLERANCE: ${GRADE_TOLERANCE:-0.5}
+      DATABASE_URL: postgresql+asyncpg://smplixit:smplixit@postgres:5432/smplixit
+      GUARD_SERVICE_URL: http://guard:8003
+      ALLOWED_ORIGINS: http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      guard:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local

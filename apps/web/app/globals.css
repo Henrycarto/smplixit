@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-shell text-slate antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Every number in this product is compared against another number sitting
+     directly above or below it. Proportional digits make a grade drop from 16
+     to 5 harder to scan than it needs to be. */
+  .tabular,
+  table,
+  input[type="number"] {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply tracking-tight;
+  }
+
+  ::selection {
+    background: #0d9488;
+    color: #ffffff;
+  }
+
+  /* Dark scrollbars. A default light scrollbar on the shell reads as a
+     rendering bug on a dark clinical UI. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #1f2e3d transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: #1f2e3d;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: #2a3d50;
+    background-clip: content-box;
+  }
+
+  /* Panels are white surfaces on a dark shell and need light scrollbars. */
+  .panel-scroll {
+    scrollbar-color: #c4cdd6 transparent;
+  }
+
+  .panel-scroll::-webkit-scrollbar-thumb {
+    background: #c4cdd6;
+    background-clip: content-box;
+  }
+
+  :focus-visible {
+    outline: 2px solid #0d9488;
+    outline-offset: 1px;
+  }
+}
+
+@layer components {
+  /* Uppercase micro label used on every panel header and field. */
+  .label-micro {
+    @apply text-2xs font-semibold uppercase tracking-label text-slate-dark;
+  }
+
+  /* Standard content surface: white, hairline border, square. */
+  .surface {
+    @apply border border-panel-border bg-panel;
+  }
+
+  /* Dense data row used in the job table and the medication lists. */
+  .row-dense {
+    @apply border-b border-panel-border px-3 py-1.5 text-sm;
+  }
+}

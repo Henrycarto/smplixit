@@ -1,0 +1,160 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        default: staging
+        type: choice
+        options: [staging, production]
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+  ECS_CLUSTER: smplixit-${{ inputs.environment || 'staging' }}
+
+jobs:
+  push-images:
+    name: Build and push ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [core, poly, guard]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Production images ship the tuned engine modules, which are pulled from
+      # the private artifact store into the build context. The bootstrap script
+      # only fills in reference templates for whatever the sync did not provide,
+      # so a partial or absent sync degrades to a working build rather than a
+      # broken image.
+      - name: Sync private engine modules
+        if: ${{ secrets.ENGINE_ARTIFACT_URI != '' }}
+        run: |
+          aws s3 sync "${{ secrets.ENGINE_ARTIFACT_URI }}" services/core/app/engine/ \
+            --exclude "*" --include "*.py" --include "rubrics/*.json"
+
+      - name: Bootstrap engine modules
+        run: node scripts/bootstrap-engine.mjs
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: services/${{ matrix.service }}
+          push: true
+          tags: |
+            ${{ steps.ecr.outputs.registry }}/smplixit-${{ matrix.service }}:${{ github.sha }}
+            ${{ steps.ecr.outputs.registry }}/smplixit-${{ matrix.service }}:latest
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+
+  deploy-services:
+    name: Roll out ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    needs: push-images
+    environment: ${{ inputs.environment || 'staging' }}
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        service: [guard, poly, core]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Guard rolls first, then Poly, then Core. Core depends on Guard being
+      # healthy: a rewrite that cannot reach Guard is refused, not shipped.
+      - name: Force new deployment
+        run: |
+          aws ecs update-service \
+            --cluster "$ECS_CLUSTER" \
+            --service "smplixit-${{ matrix.service }}" \
+            --force-new-deployment
+
+      - name: Wait for stability
+        run: |
+          aws ecs wait services-stable \
+            --cluster "$ECS_CLUSTER" \
+            --services "smplixit-${{ matrix.service }}"
+
+  deploy-web:
+    name: Deploy web console
+    runs-on: ubuntu-latest
+    needs: deploy-services
+    environment: ${{ inputs.environment || 'staging' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_CORE_API_URL: ${{ vars.CORE_API_URL }}
+          NEXT_PUBLIC_POLY_API_URL: ${{ vars.POLY_API_URL }}
+          NEXT_PUBLIC_GUARD_API_URL: ${{ vars.GUARD_API_URL }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Sync static export to S3 and invalidate CDN
+        run: |
+          aws s3 sync apps/web/.next/static "s3://${{ vars.WEB_BUCKET }}/_next/static" \
+            --cache-control "public,max-age=31536000,immutable"
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "/*"
+
+  smoke:
+    name: Post-deploy smoke test
+    runs-on: ubuntu-latest
+    needs: [deploy-services, deploy-web]
+    steps:
+      - name: Health probes
+        run: |
+          for url in "${{ vars.CORE_API_URL }}" "${{ vars.POLY_API_URL }}" "${{ vars.GUARD_API_URL }}"; do
+            echo "Probing $url/health"
+            curl --fail --silent --show-error --max-time 20 "$url/health" > /dev/null
+          done
+          echo "All services healthy"
