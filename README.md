@@ -199,6 +199,7 @@ The repository stays on Next 14.2.35, the latest 14.x patch, with an npm overrid
 
 ## Documentation
 
+- [`docs/HANDOFF.md`](docs/HANDOFF.md) start here if you are new to the repository: real vs. scaffolding, the decisions that look arbitrary, and where the work resumes
 - [`docs/architecture.md`](docs/architecture.md) service topology, data flow, failure modes
 - [`docs/fhir-integration.md`](docs/fhir-integration.md) SMART on FHIR launch, scopes, Epic and Cerner specifics
 - [`docs/literacy-scoring-methodology.md`](docs/literacy-scoring-methodology.md) why SMOG and Flesch-Kincaid, and how the dual gate works
