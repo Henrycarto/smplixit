@@ -255,16 +255,27 @@ export interface ApiError {
   context?: Record<string, unknown> | null;
 }
 
-/** Grade bands used for color and label across the console. */
+/**
+ * Grade bands used for color and label across the console.
+ *
+ * The final band is unbounded, so every grade lands in exactly one band and
+ * `gradeBand` can never fall through. It is named rather than inlined so the
+ * fallback below refers to it directly: indexing the array to find the last
+ * entry yields `T | undefined` under `noUncheckedIndexedAccess`, which makes a
+ * total function look partial.
+ */
+const CLINICAL_BAND = { max: Number.POSITIVE_INFINITY, label: "Clinical", tone: "fail" } as const;
+
 export const GRADE_BANDS = [
   { max: 6, label: "Target", tone: "pass" },
   { max: 8, label: "Acceptable", tone: "near" },
   { max: 12, label: "Above target", tone: "warn" },
-  { max: Infinity, label: "Clinical", tone: "fail" },
+  CLINICAL_BAND,
 ] as const;
 
-export type GradeTone = (typeof GRADE_BANDS)[number]["tone"];
+export type GradeBand = (typeof GRADE_BANDS)[number];
+export type GradeTone = GradeBand["tone"];
 
-export function gradeBand(grade: number): (typeof GRADE_BANDS)[number] {
-  return GRADE_BANDS.find((band) => grade <= band.max) ?? GRADE_BANDS[GRADE_BANDS.length - 1];
+export function gradeBand(grade: number): GradeBand {
+  return GRADE_BANDS.find((band) => grade <= band.max) ?? CLINICAL_BAND;
 }
