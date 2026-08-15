@@ -12,18 +12,38 @@ passes to reach a low target grade.
 Interface contract that `prompt_builder.py` must satisfy:
 
     SYSTEM_PROMPT: str
+    correction_instruction(failures: list[GateFailure]) -> str
     build_initial_prompt(*, discharge_summary, target_grade, preserve_terms,
                          difficult_terms) -> list[dict[str, str]]
     build_refinement_prompt(*, discharge_summary, previous_output, target_grade,
                             failure_reason, attempt, preserve_terms,
                             difficult_terms) -> list[dict[str, str]]
 
-Both return a chat-style message list. Both must be pure functions with no I/O.
+Both return a chat-style message list. All must be pure functions with no I/O.
 """
 
 from __future__ import annotations
 
+from app.engine.scorer import GateFailure
 from app.schemas import DifficultTerm
+
+
+def correction_instruction(failures: list[GateFailure]) -> str:
+    """Restate the measured failures for the next pass.
+
+    The template reports the numbers and asks for a simpler rewrite. It does not
+    carry the per-formula remedies that make the tuned pipeline converge in few
+    passes, which is the main reason this template needs more attempts to reach
+    a low target grade.
+    """
+    if not failures:
+        return ""
+
+    measured = " ".join(
+        f"{failure.formula} is {failure.measured} against a ceiling of {failure.ceiling}."
+        for failure in failures
+    )
+    return f"{measured} Simplify further to bring both scores under the ceiling."
 
 SYSTEM_PROMPT = """You rewrite hospital discharge instructions for patients.
 

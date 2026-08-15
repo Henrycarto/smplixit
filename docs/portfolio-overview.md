@@ -46,7 +46,29 @@ Three details make it defensible rather than decorative. The grade shown is the 
 
 ---
 
-## 5. Public and private split
+## 5. Interface design
+
+The reference point is a Bloomberg Terminal or an Epic dashboard, not a software marketing site. The buyer is a hospital CFO or chief medical officer, and the feeling the interface has to produce on first open is that their compliance team already approved it.
+
+That translates into rules the build follows without exception. Borders separate regions instead of shadows, because a floating card wastes the space around it. Corner radius tops out at 3px, since pill buttons read as consumer software. Every numeral is tabular, so a grade dropping from 16.4 to 5.2 can be compared by eye down a column. The type scale starts at 11px because a discharge summary and its rewrite have to sit side by side on a workstation display without either being scrolled. Teal is rationed to three things: the literacy score, primary actions, and active state. A color that appears everywhere signals nothing.
+
+The list of what was deliberately not built is as load-bearing as what was:
+
+- No hero gradients, gradient text, or oversized display type
+- No three-column feature grid of icons and one-line descriptions
+- No warm cream or near-black backgrounds; the shell is a single deep navy
+- No whitespace used as a design gesture
+- No pill buttons, no floating cards, no drop shadows as layout
+- No "trusted by" logo strip, no testimonial cards, no star ratings
+- No mesh gradients or glow effects
+
+The landing page follows from the same logic. It opens on the number, 31 percent, at the largest type size in the product, followed by the specimen showing a real cardiology discharge summary before and after. Below that is a dense specification table of the three services and a four-figure evidence strip. There is no value proposition paragraph and no invitation to imagine anything, because the person evaluating a compliance purchase reads specifications and is put off by being sold to.
+
+Information density is the whole argument. Every element on screen earns its place by serving the discharge workflow, and the two-column split giving the before and after the full height of the viewport is the clearest statement of what the product actually is.
+
+---
+
+## 6. Public and private split
 
 The repository is public except for three files: the prompt pipeline, the grade-level constraint and attempt-selection logic, and the maintained clinical-term rubric.
 
@@ -58,7 +80,7 @@ The split is implemented so it costs nothing to a reader. Each withheld module h
 
 ---
 
-## 6. Build status
+## 7. Build status
 
 Stated precisely, because the distinction between tested and written matters in this conversation.
 

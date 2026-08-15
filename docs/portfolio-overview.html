@@ -1,0 +1,841 @@
+<title>Smplixit Case File</title>
+<style>
+  /* ------------------------------------------------------------------
+     Dark-first. The product lives on a navy clinical shell, and the case
+     file speaks the same language. Light theme is fully designed, not
+     an inversion.
+     ------------------------------------------------------------------ */
+  :root {
+    --ground:        #0E1620;
+    --raised:        #16212D;
+    --sunken:        #0A1017;
+    --rule:          #223243;
+    --rule-soft:     #1A2735;
+    --ink:           #E9EFF4;
+    --ink-dim:       #9DB0C0;
+    --ink-faint:     #6B8095;
+    --accent:        #17B3A3;
+    --accent-dim:    #0E7F74;
+    --accent-wash:   rgba(23,179,163,0.10);
+    --critical:      #F0706B;
+    --critical-wash: rgba(240,112,107,0.10);
+    --caution:       #E2A33C;
+    --caution-wash:  rgba(226,163,60,0.10);
+    --shadow:        none;
+
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+    --measure: 68ch;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --ground:        #F6F8FA;
+      --raised:        #FFFFFF;
+      --sunken:        #EDF1F5;
+      --rule:          #D3DDE5;
+      --rule-soft:     #E3EAF0;
+      --ink:           #0F1D28;
+      --ink-dim:       #4A5F72;
+      --ink-faint:     #74889A;
+      --accent:        #0B7C71;
+      --accent-dim:    #0B7C71;
+      --accent-wash:   rgba(11,124,113,0.08);
+      --critical:      #C0393A;
+      --critical-wash: rgba(192,57,58,0.07);
+      --caution:       #96631A;
+      --caution-wash:  rgba(150,99,26,0.09);
+      --shadow:        none;
+    }
+  }
+
+  :root[data-theme="light"] {
+    --ground:        #F6F8FA;
+    --raised:        #FFFFFF;
+    --sunken:        #EDF1F5;
+    --rule:          #D3DDE5;
+    --rule-soft:     #E3EAF0;
+    --ink:           #0F1D28;
+    --ink-dim:       #4A5F72;
+    --ink-faint:     #74889A;
+    --accent:        #0B7C71;
+    --accent-dim:    #0B7C71;
+    --accent-wash:   rgba(11,124,113,0.08);
+    --critical:      #C0393A;
+    --critical-wash: rgba(192,57,58,0.07);
+    --caution:       #96631A;
+    --caution-wash:  rgba(150,99,26,0.09);
+    --shadow:        none;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .tab { font-variant-numeric: tabular-nums; }
+
+  /* ---------------------------------------------------------- shell */
+
+  .shell {
+    display: grid;
+    grid-template-columns: 1fr;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  @media (min-width: 1040px) {
+    .shell { grid-template-columns: 208px minmax(0, 1fr); gap: 56px; padding: 0 40px; }
+  }
+
+  /* Section index. Numbered because the document is genuinely a reading
+     sequence, not because numbers look tidy. */
+  .index {
+    display: none;
+  }
+
+  @media (min-width: 1040px) {
+    .index {
+      display: block;
+      position: sticky;
+      top: 0;
+      align-self: start;
+      padding: 96px 0 40px;
+    }
+  }
+
+  .index-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 14px;
+  }
+
+  .index ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+
+  .index a {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 8px;
+    padding: 5px 0;
+    color: var(--ink-dim);
+    text-decoration: none;
+    font-size: 13px;
+    line-height: 1.35;
+    border-bottom: 1px solid transparent;
+  }
+
+  .index a:hover { color: var(--accent); }
+  .index a span:first-child { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); padding-top: 1px; }
+  .index a:hover span:first-child { color: var(--accent); }
+
+  main { padding: 56px 0 96px; min-width: 0; }
+
+  /* ----------------------------------------------------------- hero */
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 20px;
+  }
+
+  .stat {
+    font-family: var(--sans);
+    font-size: clamp(72px, 13vw, 132px);
+    font-weight: 700;
+    letter-spacing: -0.045em;
+    line-height: 0.86;
+    margin: 0;
+    color: var(--ink);
+  }
+
+  .stat-claim {
+    font-size: clamp(20px, 2.6vw, 27px);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.28;
+    text-wrap: balance;
+    max-width: 22ch;
+    margin: 22px 0 0;
+  }
+
+  .lede {
+    max-width: var(--measure);
+    color: var(--ink-dim);
+    margin: 20px 0 0;
+  }
+
+  /* The product's signature element, reproduced as an instrument readout.
+     This is the most characteristic thing in the subject's world. */
+  .readout {
+    margin: 40px 0 0;
+    border: 1px solid var(--rule);
+    background: var(--raised);
+  }
+
+  .readout-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--sunken);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .readout-body { padding: 22px 16px 18px; }
+
+  .grades {
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .grade { display: flex; flex-direction: column; gap: 3px; }
+
+  .grade-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .grade-value {
+    font-family: var(--sans);
+    font-size: 46px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .grade-from .grade-value { color: var(--ink-dim); }
+  .grade-to .grade-value { color: var(--accent); }
+
+  .grade-gap {
+    flex: 1 1 90px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 12px;
+    min-width: 90px;
+  }
+
+  .grade-gap hr { flex: 1; border: 0; border-top: 1px solid var(--rule); margin: 0; }
+
+  .grade-gap span {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+
+  .bar {
+    position: relative;
+    height: 6px;
+    margin-top: 20px;
+    background: var(--sunken);
+    border: 1px solid var(--rule-soft);
+  }
+
+  .bar-fill { position: absolute; inset: 0 auto 0 0; width: 68%; background: var(--accent); }
+  .bar-tick { position: absolute; top: -4px; bottom: -4px; left: 63.4%; width: 1px; background: var(--ink); }
+
+  .bar-legend {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+  }
+
+  /* -------------------------------------------------------- sections */
+
+  section { margin: 72px 0 0; scroll-margin-top: 24px; }
+
+  h2 {
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    gap: 10px;
+    align-items: baseline;
+    font-size: clamp(21px, 2.4vw, 26px);
+    font-weight: 650;
+    letter-spacing: -0.028em;
+    line-height: 1.22;
+    text-wrap: balance;
+    margin: 0 0 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  h2 .num {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+  }
+
+  h3 {
+    font-size: 15px;
+    font-weight: 650;
+    letter-spacing: -0.012em;
+    margin: 30px 0 10px;
+    color: var(--ink);
+  }
+
+  p { max-width: var(--measure); margin: 0 0 16px; }
+  p:last-child { margin-bottom: 0; }
+
+  strong { font-weight: 650; color: var(--ink); }
+
+  em {
+    font-style: normal;
+    font-family: var(--mono);
+    font-size: 0.9em;
+    color: var(--accent);
+  }
+
+  /* --------------------------------------------------------- devices */
+
+  .services {
+    display: grid;
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin: 24px 0 0;
+  }
+
+  @media (min-width: 760px) { .services { grid-template-columns: repeat(3, 1fr); } }
+
+  .service { background: var(--raised); padding: 16px; }
+
+  .service h4 {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 8px;
+  }
+
+  .service p { font-size: 14px; color: var(--ink-dim); margin: 0; max-width: none; }
+
+  /* The release gate, drawn as the conjunction it actually is. */
+  .gate { border: 1px solid var(--rule); background: var(--raised); margin: 24px 0 0; }
+
+  .gate-head {
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--sunken);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .gate ol { list-style: none; margin: 0; padding: 0; }
+
+  .gate li {
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    gap: 10px;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--rule-soft);
+    font-size: 14px;
+    color: var(--ink-dim);
+  }
+
+  .gate li:last-child { border-bottom: 0; }
+  .gate li span:first-child { font-family: var(--mono); font-size: 11px; color: var(--accent); }
+
+  .gate-foot {
+    padding: 11px 16px;
+    border-top: 1px solid var(--rule);
+    background: var(--critical-wash);
+    font-size: 13px;
+    color: var(--ink);
+  }
+
+  /* Anti-pattern list. Struck through, because it records what was
+     refused, not what was built. */
+  .refused { border-left: 2px solid var(--rule); padding-left: 18px; margin: 20px 0 0; }
+  .refused ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+
+  .refused li {
+    font-size: 14px;
+    color: var(--ink-faint);
+    text-decoration: line-through;
+    text-decoration-color: var(--critical);
+    text-decoration-thickness: 1px;
+  }
+
+  /* Build status. Three states, encoded in a stripe as well as a word. */
+  .status { display: flex; flex-direction: column; gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin: 20px 0 0; }
+  .status-row { background: var(--raised); padding: 13px 16px 13px 18px; border-left: 3px solid var(--rule); }
+  .status-row.ok { border-left-color: var(--accent); }
+  .status-row.pending { border-left-color: var(--caution); }
+  .status-row.blocked { border-left-color: var(--critical); }
+
+  .status-row p { font-size: 14px; color: var(--ink-dim); margin: 0; max-width: none; }
+  .status-row p + p { margin-top: 5px; }
+
+  .chip {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    margin-right: 9px;
+    vertical-align: 1px;
+    border: 1px solid;
+  }
+
+  .chip.ok { color: var(--accent); border-color: var(--accent); background: var(--accent-wash); }
+  .chip.pending { color: var(--caution); border-color: var(--caution); background: var(--caution-wash); }
+  .chip.blocked { color: var(--critical); border-color: var(--critical); background: var(--critical-wash); }
+
+  .callout {
+    border: 1px solid var(--critical);
+    background: var(--critical-wash);
+    padding: 15px 17px;
+    margin: 24px 0 0;
+  }
+
+  .callout p { font-size: 14px; margin: 0; }
+  .callout p + p { margin-top: 8px; }
+
+  .table-wrap { overflow-x: auto; margin: 22px 0 0; border: 1px solid var(--rule); }
+
+  table { border-collapse: collapse; width: 100%; min-width: 480px; background: var(--raised); }
+
+  th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    text-align: left;
+    font-weight: 500;
+    padding: 9px 14px;
+    background: var(--sunken);
+    border-bottom: 1px solid var(--rule);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--ink-dim);
+    border-bottom: 1px solid var(--rule-soft);
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { color: var(--ink); font-family: var(--mono); font-size: 12.5px; white-space: nowrap; }
+
+  footer {
+    margin: 80px 0 0;
+    padding: 26px 0 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  footer p { font-size: 13px; color: var(--ink-faint); }
+
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="shell">
+  <nav class="index" aria-label="Sections">
+    <p class="index-label">Case file</p>
+    <ol>
+      <li><a href="#thesis"><span>01</span><span>Thesis</span></a></li>
+      <li><a href="#architecture"><span>02</span><span>Architecture</span></a></li>
+      <li><a href="#decisions"><span>03</span><span>Decisions</span></a></li>
+      <li><a href="#badge"><span>04</span><span>The badge</span></a></li>
+      <li><a href="#interface"><span>05</span><span>Interface</span></a></li>
+      <li><a href="#split"><span>06</span><span>Repo split</span></a></li>
+      <li><a href="#status"><span>07</span><span>Build status</span></a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header>
+      <p class="eyebrow">Smplixit &middot; Adaptive health literacy engine</p>
+      <p class="stat tab">31%</p>
+      <p class="stat-claim">of readmissions are caused by patient misunderstanding of discharge instructions.</p>
+      <p class="lede">
+        Smplixit sits inside a hospital's EHR workflow. It takes a clinical discharge
+        summary, rewrites it to a measured reading grade, translates it into the
+        patient's language, and proves that no medication instruction was lost or
+        distorted on the way. Three FastAPI services, a Next.js clinician console,
+        SMART on FHIR against Epic and Cerner.
+      </p>
+
+      <div class="readout">
+        <div class="readout-head">
+          <span>Specimen &middot; cardiology discharge</span>
+          <span>Target grade 6</span>
+        </div>
+        <div class="readout-body">
+          <div class="grades">
+            <div class="grade grade-from">
+              <span class="grade-label">Source</span>
+              <span class="grade-value tab">16.4</span>
+            </div>
+            <div class="grade-gap" aria-hidden="true">
+              <hr /><span>11.2 grades</span><hr />
+            </div>
+            <div class="grade grade-to">
+              <span class="grade-label">Patient</span>
+              <span class="grade-value tab">5.2</span>
+            </div>
+          </div>
+          <div class="bar" role="img" aria-label="68 percent grade reduction, target met">
+            <div class="bar-fill"></div>
+            <div class="bar-tick"></div>
+          </div>
+          <div class="bar-legend tab">
+            <span>68% reduction</span>
+            <span>Target grade 6 met</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section id="thesis">
+      <h2><span class="num">01</span><span>Thesis</span></h2>
+      <p>
+        Hospitals discharge patients with instructions written at grade 13 to 16, and a
+        large share of United States adults read health material at or below basic
+        level. The document explaining how to take a blood thinner is written for a
+        reader who is not the patient holding it, and roughly a third of preventable
+        readmissions trace back to that gap. Under the CMS Hospital Readmissions
+        Reduction Program a hospital can forfeit up to 3% of its base Medicare
+        inpatient payments, which makes comprehension one of the few readmission
+        drivers a hospital can fix without touching clinical practice.
+      </p>
+      <p>
+        This has gone unsolved not because the problem is subtle but because every
+        available fix is the wrong shape. Rewriting discharge summaries by hand does
+        not survive contact with discharge volume. Pre-written education leaflets are
+        generic and cannot carry a specific dose on a specific schedule. A general
+        purpose language model will rewrite a discharge summary and, in the process,
+        drop a medication, round a dose, or soften a contraindication, and no hospital
+        will accept a tool that silently does that even once. The unlock is not the
+        rewriting, which is now commodity capability. It is proving the rewrite did
+        not lose anything.
+      </p>
+    </section>
+
+    <section id="architecture">
+      <h2><span class="num">02</span><span>Architecture</span></h2>
+      <p>Three services, deployed independently.</p>
+
+      <div class="services">
+        <div class="service">
+          <h4>Core</h4>
+          <p>
+            Scores the incoming summary with two readability formulas, rewrites to a
+            target grade, then scores the result again. A rewrite that misses is
+            returned marked for clinician review, never as finished work.
+          </p>
+        </div>
+        <div class="service">
+          <h4>Poly</h4>
+          <p>
+            Freezes every medication name, dose, and number byte-for-byte before
+            translation and verifies each survived. Languages outside machine coverage
+            route to interpreter services rather than being quietly degraded.
+          </p>
+        </div>
+        <div class="service">
+          <h4>Guard</h4>
+          <p>
+            Extracts medications from both sides of the rewrite, normalizes clinical
+            shorthand and plain language into one structure, and cross-references
+            openFDA. One critical finding blocks release.
+          </p>
+        </div>
+      </div>
+
+      <p style="margin-top:22px">
+        They are separate because they fail and scale differently. The concrete case:
+        openFDA rate limits at 240 requests per minute per IP. Sharing a process with
+        Core would mean a shift-change burst of rewrites exhausts the openFDA budget
+        and the backpressure stalls the rewrite queue behind it. Separated, Guard
+        queues against its own concurrency limit and Core keeps working. Independent
+        deployment also lets the pipeline roll Guard first, then Poly, then Core, so
+        Core never runs against a Guard version it does not expect.
+      </p>
+
+      <div class="gate">
+        <div class="gate-head">Release gate &middot; all four must hold</div>
+        <ol>
+          <li><span>01</span><span>Both SMOG and Flesch-Kincaid land at or below the target grade.</span></li>
+          <li><span>02</span><span>Guard returned a verdict.</span></li>
+          <li><span>03</span><span>That verdict carries zero critical findings.</span></li>
+          <li><span>04</span><span>No other review reason was recorded.</span></li>
+        </ol>
+        <div class="gate-foot">
+          Anything else is held for review. If Guard is unreachable the document is
+          held, not released: a rewrite that could not be validated is treated the same
+          as one that failed validation.
+        </div>
+      </div>
+    </section>
+
+    <section id="decisions">
+      <h2><span class="num">03</span><span>Engineering decisions</span></h2>
+
+      <h3>SMART on FHIR rather than an application login</h3>
+      <p>
+        Smplixit holds no clinician credentials. Authentication delegates to the
+        hospital identity provider over OAuth 2.0 with PKCE, so the clinician is
+        already whoever Epic says they are and this application never becomes a second
+        place a hospital password can leak from. The client is read-only with no write
+        path to the chart, which is the first question an EHR analyst asks. The cost is
+        that nothing works until vendor registration completes, and that is accepted:
+        an integration a security team will not approve has no value regardless of how
+        well it runs.
+      </p>
+
+      <h3>Async FastAPI throughout</h3>
+      <p>
+        The workload is almost entirely waiting on somebody else's network. A rewrite
+        holds a connection open for 5 to 40 seconds while Guard makes several
+        concurrent openFDA calls and Poly waits on a translation endpoint. Under a
+        synchronous model each wait occupies a worker, and shift-change volume would
+        need worker counts that stop being economical. Async keeps one container
+        serving many concurrent in-flight rewrites at low CPU, which is why the Fargate
+        task sizing is modest.
+      </p>
+
+      <h3>DeepL over Google Translate</h3>
+      <p>
+        DeepL is measurably better on medical register in the European languages that
+        dominate United States interpreter demand, but the deciding factor was
+        mechanical. DeepL supports XML tag handling with an ignore list, which lets a
+        dose be wrapped in a tag the engine leaves untouched and returns verbatim. That
+        turns terminology preservation from a hope into a verifiable property: the
+        exact tokens sent in are checked on the way out, and any that did not survive
+        hold the document. The tradeoff is coverage, so the registry carries a second
+        tier of 30 high-demand languages DeepL does not reach.
+      </p>
+
+      <h3>openFDA as the validation layer</h3>
+      <p>
+        Asking a model to confirm its own rewrite preserved every dose produces a
+        confident answer with no evidential value. openFDA is authoritative, free, and
+        public, so it introduces no PHI exposure. Drug extraction runs three strategies,
+        a curated lexicon, FDA generic stems such as <em>-pril</em> and <em>-statin</em>,
+        and any token sitting immediately in front of a dose. openFDA is what confirms a
+        guessed candidate is really a drug before it can raise a critical finding. A
+        false critical finding on a correct rewrite is the failure that kills clinical
+        alerting systems, because clinicians learn to dismiss the panel.
+      </p>
+    </section>
+
+    <section id="badge">
+      <h2><span class="num">04</span><span>What the badge signals</span></h2>
+      <p>
+        The reading level badge shows two numbers and the distance between them, with a
+        bar filled to the proportion of grades removed and a tick marking the target.
+      </p>
+      <p>
+        It matters because it converts the product's claim into a single measured figure
+        a non-technical buyer can act on. A hospital CFO cannot evaluate a rewrite
+        pipeline, but they can read that a document their staff produced at grade 16 now
+        reads at grade 5, and connect that to a readmission penalty already on a
+        spreadsheet. It is the one artifact that carries the entire argument without
+        explanation.
+      </p>
+      <p>
+        Three details make it defensible rather than decorative. The grade shown is the
+        <strong>maximum</strong> of two independent formulas, not their average, because
+        a blended score can be gamed by chopping sentences while leaving vocabulary
+        untouched, and requiring both to clear the target forces the rewrite to do both
+        kinds of work. The figure is always the score of the text actually returned, so
+        the badge cannot display a target the document did not earn. And when the target
+        was missed the fill turns amber and the gap stays visible, because a badge that
+        stays green on a failed rewrite is a badge that lies to a compliance officer.
+      </p>
+    </section>
+
+    <section id="interface">
+      <h2><span class="num">05</span><span>Interface design</span></h2>
+      <p>
+        The reference point is a Bloomberg Terminal or an Epic dashboard, not a software
+        marketing site. The buyer is a hospital CFO or chief medical officer, and the
+        feeling the interface has to produce on first open is that their compliance team
+        already approved it.
+      </p>
+      <p>
+        That translates into rules the build follows without exception. Borders separate
+        regions instead of shadows, because a floating card wastes the space around it.
+        Corner radius tops out at 3px, since pill buttons read as consumer software.
+        Every numeral is tabular, so a grade dropping from 16.4 to 5.2 can be compared by
+        eye down a column. The type scale starts at 11px because a discharge summary and
+        its rewrite have to sit side by side on a workstation display without either
+        being scrolled. Teal is rationed to three things: the literacy score, primary
+        actions, and active state. A color that appears everywhere signals nothing.
+      </p>
+
+      <p style="margin-top:24px"><strong>Deliberately not built:</strong></p>
+      <div class="refused">
+        <ul>
+          <li>Hero gradients, gradient text, oversized display type</li>
+          <li>Three-column feature grid of icons and one-line descriptions</li>
+          <li>Warm cream or near-black backgrounds</li>
+          <li>Whitespace used as a design gesture</li>
+          <li>Pill buttons, floating cards, drop shadows as layout</li>
+          <li>Trusted-by logo strips, testimonial cards, star ratings</li>
+          <li>Mesh gradients and glow effects</li>
+        </ul>
+      </div>
+
+      <p style="margin-top:22px">
+        The landing page follows the same logic. It opens on the number at the largest
+        type size in the product, followed by a real cardiology specimen before and
+        after, then a dense specification table of the three services. There is no value
+        proposition paragraph and no invitation to imagine anything, because the person
+        evaluating a compliance purchase reads specifications and is put off by being
+        sold to. The two-column split giving the before and after the full height of the
+        viewport is the clearest statement of what the product actually is.
+      </p>
+    </section>
+
+    <section id="split">
+      <h2><span class="num">06</span><span>Public and private split</span></h2>
+      <p>
+        The repository is public except for three files: the prompt pipeline, the
+        grade-level constraint logic, and the maintained clinical-term rubric.
+      </p>
+      <p>
+        That boundary follows what is actually differentiated. The FHIR OAuth layer, the
+        openFDA client, drug extraction, the pre and post rewrite comparison, the scoring
+        methodology, and the infrastructure are all public. They are the credibility
+        signal: a reviewer can read the auth flow, check that PKCE is done correctly,
+        check that state comparison is constant-time, and confirm the safety gate fails
+        closed. None of that is a moat, because any competent team can rebuild it from
+        the specifications, and hiding it would only make the work harder to evaluate.
+      </p>
+      <p>
+        What is worth withholding is the tuning, specifically how a measured failure is
+        phrased back into the next pass to make the loop converge in few attempts while
+        preserving every dose. That is accumulated iteration, not architecture, and it is
+        the part that would transfer directly to a competitor.
+      </p>
+      <p>
+        The split costs a reader nothing. Each withheld module has a tracked reference
+        template implementing the same public interface and preserving the same safety
+        posture, and a bootstrap script materializes them on install, so a clean clone
+        builds, boots, and passes the full test suite. Verified by stashing the tuned
+        modules and running the suite against the templates alone.
+      </p>
+    </section>
+
+    <section id="status">
+      <h2><span class="num">07</span><span>Build status</span></h2>
+      <p>
+        Stated precisely, because the distinction between tested and written matters in
+        this conversation.
+      </p>
+
+      <div class="status">
+        <div class="status-row ok">
+          <p><span class="chip ok">Verified</span><strong>50 tests passing across three services.</strong> 10 on scoring, 14 on terminology protection and the language registry, 26 on drug extraction and the pre/post comparison. All three lint clean.</p>
+        </div>
+        <div class="status-row ok">
+          <p><span class="chip ok">Verified</span><strong>Guard exercised end to end.</strong> A faithful rewrite passes at 100. The same rewrite with the furosemide dose altered from 40&nbsp;mg to 4&nbsp;mg and one warning removed is blocked at 15 with two critical findings, each naming source and output values.</p>
+        </div>
+        <div class="status-row ok">
+          <p><span class="chip ok">Verified</span><strong>Shorthand normalizes to plain language.</strong> <em>PO BID</em> and "by mouth two times a day" compare as identical, which is the property the entire comparison rests on.</p>
+        </div>
+        <div class="status-row ok">
+          <p><span class="chip ok">Verified</span><strong>Console builds and runs.</strong> Typechecks clean across 8 routes, live scoring against Core measured a sample discharge summary at grade 18.7 against a target of 6.</p>
+        </div>
+        <div class="status-row ok">
+          <p><span class="chip ok">Verified</span><strong>Outages read as outages.</strong> With the database down the dashboard reports a 503, not an empty list, so an outage cannot render as "no records".</p>
+        </div>
+        <div class="status-row pending">
+          <p><span class="chip pending">Not run</span><strong>No external credential was used,</strong> so every third-party integration is unproven against its live service.</p>
+          <p>No live model call, so the rewrite loop's convergence against a real model is unmeasured. This is the largest open item. No live DeepL call. No live openFDA call, Guard is tested against stub fixtures. No database instance. Docker images never built, Terraform never validated locally; CI covers both.</p>
+        </div>
+        <div class="status-row pending">
+          <p><span class="chip pending">Needs access</span><strong>The SMART on FHIR flow has never executed against a server,</strong> including a vendor sandbox.</p>
+          <p>Going live needs vendor app registration and a client id, a registered redirect URI matching configuration exactly, hospital scope approval, a server-side session store for the PKCE verifier, and a successful sandbox launch. The first three are hospital and vendor process rather than engineering work, and they are the long pole in any deployment of this kind.</p>
+        </div>
+        <div class="status-row blocked">
+          <p><span class="chip blocked">Open</span><strong>Next.js framework advisories.</strong> The published range covers all of Next 14 and 15; only Next 16 is patched.</p>
+          <p>The build stays on 14.2.35 with an override lifting the bundled postcss to a patched release, and most remaining advisories concern features this application does not use. That is a mitigation, not a fix. Migrating to Next 16 is a prerequisite for production PHI handling, and it is scoped work rather than a version bump: React 19 and the async params contract.</p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <p><strong>The honest summary.</strong> The safety argument, which is the hard part and the actual product, is built and tested. The integrations around it are written to specification and waiting on credentials.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">&mdash;</span><span>Stack</span></h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Layer</th><th>Choice</th><th>Note</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Console</td><td>Next.js 14 App Router, TypeScript, Tailwind</td><td>Data-dense two-column workspace</td></tr>
+            <tr><td>Services</td><td>FastAPI, async throughout</td><td>I/O-bound by nature</td></tr>
+            <tr><td>Scoring</td><td>textstat, SMOG and Flesch-Kincaid</td><td>Stricter of the two always wins</td></tr>
+            <tr><td>Translation</td><td>DeepL, XML ignore tags</td><td>36 machine targets, 30 interpreter</td></tr>
+            <tr><td>Drug data</td><td>openFDA drug label API</td><td>Cached six hours, public data</td></tr>
+            <tr><td>Database</td><td>PostgreSQL</td><td>Append-only audit trail</td></tr>
+            <tr><td>Auth</td><td>SMART on FHIR, OAuth 2.0 with PKCE</td><td>Epic and Cerner, read only</td></tr>
+            <tr><td>Infra</td><td>AWS ECS Fargate, RDS, S3, Terraform</td><td>Isolated database subnet tier</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>
+      <p>
+        Smplixit processes PHI. The reference deployment runs inside the customer VPC,
+        encrypts at rest with a customer-managed key, and writes an immutable audit row
+        for every rewrite, translation, and validation. The database subnet tier has no
+        route to a NAT gateway in either direction.
+      </p>
+    </footer>
+  </main>
+</div>

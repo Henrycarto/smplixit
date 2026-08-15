@@ -9,6 +9,8 @@ These lock in the two properties the product depends on:
 
 from __future__ import annotations
 
+import re
+
 import pytest
 from app.engine import scorer
 
@@ -64,15 +66,65 @@ def test_meets_target_requires_both_formulas_to_clear():
     assert not scorer.meets_target(level, strict)
 
 
-def test_rejection_reason_is_actionable_and_names_the_failing_formula():
+def test_rejection_reason_states_the_measurement():
     level = scorer.score(CLINICAL)
     reason = scorer.rejection_reason(level, 6)
 
     assert reason is not None
     assert "SMOG" in reason or "Flesch-Kincaid" in reason
-    # The reason is fed straight into the next prompt, so it has to carry the
-    # measured number, not just a verdict.
+    # This string goes into the audit trail, so it has to carry the measured
+    # number rather than only a verdict.
     assert any(character.isdigit() for character in reason)
+
+
+def test_gate_failures_name_the_formula_and_its_driving_metric():
+    level = scorer.score(CLINICAL)
+    failures = scorer.gate_failures(level, 6)
+
+    assert failures
+    by_formula = {failure.formula: failure for failure in failures}
+
+    # The two formulas fail for different reasons, and the caller has to be able
+    # to tell them apart. Collapsing them into one message is what lets a
+    # rewrite fix sentence length and leave the vocabulary untouched.
+    if "SMOG" in by_formula:
+        assert by_formula["SMOG"].driver_metric == "polysyllabic_words"
+        assert by_formula["SMOG"].measured > by_formula["SMOG"].ceiling
+    if "Flesch-Kincaid" in by_formula:
+        assert by_formula["Flesch-Kincaid"].driver_metric == "avg_sentence_length"
+
+
+def test_gate_failures_are_empty_when_the_gate_passes():
+    level = scorer.score(PLAIN)
+    assert scorer.gate_failures(level, 12) == []
+
+
+def test_scorer_reports_measurement_only():
+    """The scorer measures. It must not tell a model what to do about it.
+
+    Correction phrasing is the tuned part of the pipeline and lives in
+    prompt_builder, which is not distributed. This test is the guard that keeps
+    it from drifting back into the public scoring module.
+
+    Asserted on shape rather than on a list of forbidden phrases, so the test
+    cannot pass while carrying instruction text it forgot to name, and so the
+    private wording is not reproduced here in order to check for it.
+    """
+    level = scorer.score(CLINICAL)
+    reason = scorer.rejection_reason(level, 6)
+    assert reason is not None
+
+    # Matched whole-string rather than split on ".", because the measurements
+    # themselves contain decimal points.
+    number = r"-?\d+(?:\.\d+)?"
+    sentence = (
+        rf"(?:SMOG|Flesch-Kincaid) measured {number} against a ceiling of "
+        rf"{number} \([a-z ]+: {number}\)\."
+    )
+
+    assert re.fullmatch(rf"{sentence}(?: {sentence})*", reason), (
+        f"rejection_reason carries content beyond the measurement: {reason!r}"
+    )
 
 
 def test_rejection_reason_is_none_when_the_gate_passes():

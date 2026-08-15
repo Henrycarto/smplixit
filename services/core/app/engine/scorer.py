@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import json
 import re
+from dataclasses import dataclass
 from pathlib import Path
 
 import textstat
@@ -127,32 +128,76 @@ def meets_target(level: ReadingLevel, target_grade: int, tolerance: float = 0.5)
     return level.smog <= ceiling and level.flesch_kincaid <= ceiling
 
 
-def rejection_reason(level: ReadingLevel, target_grade: int, tolerance: float = 0.5) -> str | None:
-    """Human-readable explanation of why a rewrite attempt failed the gate.
+@dataclass(frozen=True)
+class GateFailure:
+    """One formula that did not clear the target, with the metric driving it.
 
-    This string is fed back into the next rewrite prompt, so it is phrased as an
-    instruction the model can act on rather than as a bare metric dump.
+    Measurement only. This carries no instruction about how to fix the failure:
+    turning a failure into a correction the rewrite pipeline can act on is
+    prompt construction, and it lives in `prompt_builder`.
     """
-    if meets_target(level, target_grade, tolerance):
-        return None
 
+    formula: str          # "SMOG" or "Flesch-Kincaid"
+    measured: float
+    ceiling: float
+    driver_metric: str    # the metric responsible for this formula's score
+    driver_value: float
+
+
+def gate_failures(
+    level: ReadingLevel, target_grade: int, tolerance: float = 0.5
+) -> list[GateFailure]:
+    """Which formulas missed the target, and by how much.
+
+    The structured form the rewrite pipeline consumes. Each failure names the
+    metric that drives its formula, because the two formulas fail for different
+    reasons and a caller needs to distinguish them: SMOG is driven by
+    polysyllabic vocabulary, Flesch-Kincaid by sentence length.
+    """
     ceiling = target_grade + tolerance
-    problems: list[str] = []
+    failures: list[GateFailure] = []
 
     if level.smog > ceiling:
-        problems.append(
-            f"SMOG is {level.smog} against a ceiling of {ceiling}. "
-            f"There are still {level.polysyllabic_word_count} words of three or more syllables. "
-            "Replace the long words, do not just split the sentences."
+        failures.append(
+            GateFailure(
+                formula="SMOG",
+                measured=level.smog,
+                ceiling=ceiling,
+                driver_metric="polysyllabic_words",
+                driver_value=float(level.polysyllabic_word_count),
+            )
         )
     if level.flesch_kincaid > ceiling:
-        problems.append(
-            f"Flesch-Kincaid is {level.flesch_kincaid} against a ceiling of {ceiling}. "
-            f"Average sentence length is {level.avg_sentence_length} words. "
-            "Break the long sentences into separate short ones."
+        failures.append(
+            GateFailure(
+                formula="Flesch-Kincaid",
+                measured=level.flesch_kincaid,
+                ceiling=ceiling,
+                driver_metric="avg_sentence_length",
+                driver_value=level.avg_sentence_length,
+            )
         )
 
-    return " ".join(problems)
+    return failures
+
+
+def rejection_reason(level: ReadingLevel, target_grade: int, tolerance: float = 0.5) -> str | None:
+    """Factual statement of why an attempt failed the gate.
+
+    Reports the measured numbers and nothing else. This string is what gets
+    written to the audit trail and shown to a reviewer, so it states what was
+    measured rather than what somebody should do about it.
+    """
+    failures = gate_failures(level, target_grade, tolerance)
+    if not failures:
+        return None
+
+    return " ".join(
+        f"{failure.formula} measured {failure.measured} against a ceiling of "
+        f"{failure.ceiling} ({failure.driver_metric.replace('_', ' ')}: "
+        f"{failure.driver_value:g})."
+        for failure in failures
+    )
 
 
 def find_difficult_terms(text: str, max_terms: int = 25) -> list[DifficultTerm]:

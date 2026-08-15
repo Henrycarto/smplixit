@@ -157,15 +157,17 @@ class RewriteEngine:
                 continue
 
             level = scorer.score(text)
-            failure_reason = scorer.rejection_reason(level, target, settings.grade_tolerance)
+            failures = scorer.gate_failures(level, target, settings.grade_tolerance)
+            rejection = scorer.rejection_reason(level, target, settings.grade_tolerance)
+            failure_reason = prompt_builder.correction_instruction(failures)
 
             attempts.append(
                 RewriteAttempt(
                     attempt=attempt_number,
                     target_grade=target,
                     resulting_level=level,
-                    accepted=failure_reason is None,
-                    rejection_reason=failure_reason,
+                    accepted=not failures,
+                    rejection_reason=rejection,
                     model=settings.openai_model,
                     prompt_tokens=prompt_tokens,
                     completion_tokens=completion_tokens,
@@ -173,7 +175,7 @@ class RewriteEngine:
                 )
             )
 
-            if failure_reason is None:
+            if not failures:
                 break
 
         if level is None:
