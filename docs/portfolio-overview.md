@@ -116,7 +116,7 @@ The SMART on FHIR flow is complete code that has never executed against a server
 
 ### Known issue
 
-`npm audit` reports advisories covering the whole Next.js 14 and 15 line; only Next 16 is patched. The build stays on 14.2.35 with an override lifting the bundled `postcss` to a patched release, and most remaining advisories concern features this application does not use. That is a mitigation, not a fix. **Migrating to Next 16 is a prerequisite for production PHI handling**, and it is scoped work rather than a version bump: React 19 and the async `params` contract.
+The web tier is pinned to a Next.js 14 release with a dependency override in place. Moving to the current major is scoped work rather than a version bump, and it is a prerequisite for handling live patient data.
 
 ---
 
