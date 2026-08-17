@@ -802,8 +802,8 @@
           <p>Going live needs vendor app registration and a client id, a registered redirect URI matching configuration exactly, hospital scope approval, a server-side session store for the PKCE verifier, and a successful sandbox launch. The first three are hospital and vendor process rather than engineering work, and they are the long pole in any deployment of this kind.</p>
         </div>
         <div class="status-row blocked">
-          <p><span class="chip blocked">Open</span><strong>Next.js framework advisories.</strong> The published range covers all of Next 14 and 15; only Next 16 is patched.</p>
-          <p>The build stays on 14.2.35 with an override lifting the bundled postcss to a patched release, and most remaining advisories concern features this application does not use. That is a mitigation, not a fix. Migrating to Next 16 is a prerequisite for production PHI handling, and it is scoped work rather than a version bump: React 19 and the async params contract.</p>
+          <p><span class="chip blocked">Open</span><strong>Framework upgrade outstanding.</strong> The web tier is pinned to a Next.js 14 release with a dependency override in place.</p>
+      <p>Moving to the current major is scoped work rather than a version bump, and it is a prerequisite for handling live patient data.</p>
         </div>
       </div>
 
