@@ -18,7 +18,6 @@ import { SITE } from "@/lib/site";
 // `fileURLToPath`, which throws on a Windows path containing spaces and takes
 // the whole build with it. The edge build has no such lookup, and an image
 // route is the case the edge runtime is meant for.
-export const runtime = "edge";
 
 export const alt = `${SITE.name}, ${SITE.tagline}`;
 export const size = { width: 1200, height: 630 };

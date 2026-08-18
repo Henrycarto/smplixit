@@ -62,3 +62,7 @@ Thumbs.db
 coverage/
 *.pdf
 !docs/**/*.pdf
+.vercel
+
+.vercel
+.env*
