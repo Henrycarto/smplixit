@@ -10,7 +10,6 @@ import { ImageResponse } from "next/og";
 
 // See the note in `opengraph-image.tsx`: the Node build of `next/og` cannot
 // resolve its WASM binary on a Windows path with spaces in it.
-export const runtime = "edge";
 
 export const size = { width: 32, height: 32 };
 export const contentType = "image/png";
