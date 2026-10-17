@@ -59,11 +59,11 @@ NEXT_PUBLIC_SHOWCASE=1 npm run dev --workspace @smplixit/web
 
 Reading these five files in order gives you the system:
 
-1. `services/core/app/engine/scorer.py` — the two readability formulas and the dual gate. The product's central claim lives here.
-2. `services/core/app/routers/simplify.py` — the rewrite job lifecycle, including the call out to Guard.
-3. `services/guard/app/engine/` — `drug_extractor.py`, `diff_checker.py`, and `fda_client.py`: extraction, comparison across the rewrite, and the openFDA cross-reference that decides whether a job is releasable.
-4. `apps/web/components/core/ReadingLevelBadge.tsx` — the signature UI element. Its comment block explains the design system's reasoning better than the tokens do.
-5. `apps/web/app/simplify/` — the console's main workflow.
+1. `services/core/app/engine/scorer.py` - the two readability formulas and the dual gate. The product's central claim lives here.
+2. `services/core/app/routers/simplify.py` - the rewrite job lifecycle, including the call out to Guard.
+3. `services/guard/app/engine/` - `drug_extractor.py`, `diff_checker.py`, and `fda_client.py`: extraction, comparison across the rewrite, and the openFDA cross-reference that decides whether a job is releasable.
+4. `apps/web/components/core/ReadingLevelBadge.tsx` - the signature UI element. Its comment block explains the design system's reasoning better than the tokens do.
+5. `apps/web/app/simplify/` - the console's main workflow.
 
 `docs/architecture.md` has the topology and failure modes. `apps/web/tailwind.config.ts` documents the design system's rules and the reason for each.
 
@@ -77,7 +77,7 @@ Changing any of these without reading the reasoning will quietly break a guarant
 
 **Fail closed everywhere.** A rewrite that cannot be validated returns `needs_review`, never `completed`. A Guard check that cannot run blocks release rather than passing by default. This is the entire safety posture; it is worth more than throughput.
 
-**Medication tokens are frozen byte-for-byte before translation, then verified after.** Not "translated carefully" — frozen. A drug name that survives translation as a plausible near-miss is the failure mode that hurts a patient.
+**Medication tokens are frozen byte-for-byte before translation, then verified after.** Not "translated carefully" - frozen. A drug name that survives translation as a plausible near-miss is the failure mode that hurts a patient.
 
 **Teal is rationed.** It marks the literacy score, primary actions, and active state. Nothing else. The badge turns amber on a missed target because a badge that stays teal on a failed rewrite lies to a compliance officer.
 
